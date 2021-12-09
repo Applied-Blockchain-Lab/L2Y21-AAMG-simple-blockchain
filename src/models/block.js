@@ -42,6 +42,10 @@ class Block {
 
     return true;
   }
+
+  getTransactions() {
+    return this.transactions;
+  }
 }
 
 module.exports = Block;
