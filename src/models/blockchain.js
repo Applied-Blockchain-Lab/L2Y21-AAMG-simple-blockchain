@@ -20,6 +20,34 @@ class Blockchain {
     return this.chain[this.chain.length - 1];
   }
 
+  getAllBlocks() {
+    return this.chain;
+  }
+
+  getPendingTransactions() {
+    return this.pendingTransactions;
+  }
+
+  getTx(txHash) {
+
+    this.chain.forEach(block => {
+      block.getTransactions().forEach(tx => {
+        if (tx.hash === txHash) {
+          return tx;
+        }
+      })
+    });
+
+  }
+
+  getBlock(blockHash) {
+    this.chain.forEach(block => {
+      if (block.hash === blockHash) {
+        return block;
+      }
+    });
+  }
+
   minePendingTransactions(miningRewardAddress) {
 
     const txReward = new Transaction(null, miningRewardAddress, this.miningReward);
@@ -102,7 +130,7 @@ class Blockchain {
 
       if (this.pendingTransactions.length)
       this.minePendingTransactions(miningAddress);
-      
+
     }, 5 * 1000);
 
   }
