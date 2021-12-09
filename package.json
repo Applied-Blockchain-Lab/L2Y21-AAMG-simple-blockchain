@@ -19,6 +19,7 @@
   "homepage": "https://github.com/Applied-Blockchain-Lab/L2Y21-AAMG-simple-blockchain#readme",
   "dependencies": {
     "axios": "^0.24.0",
+    "crypto-js": "^4.1.1",
     "express": "^4.17.1",
     "jest": "^27.4.3",
     "nodemon": "^2.0.15"
