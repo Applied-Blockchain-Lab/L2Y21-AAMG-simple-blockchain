@@ -1,0 +1,26 @@
+{
+  "name": "aamg-simple-blockchain",
+  "version": "1.0.0",
+  "description": "A simple blockchain developed by Maximilian Georgiev and Ahmet Ahmedov.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --coverage --forceExit --runInBand",
+    "start": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Applied-Blockchain-Lab/L2Y21-AAMG-simple-blockchain.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Applied-Blockchain-Lab/L2Y21-AAMG-simple-blockchain/issues"
+  },
+  "homepage": "https://github.com/Applied-Blockchain-Lab/L2Y21-AAMG-simple-blockchain#readme",
+  "dependencies": {
+    "axios": "^0.24.0",
+    "express": "^4.17.1",
+    "jest": "^27.4.3",
+    "nodemon": "^2.0.15"
+  }
+}
