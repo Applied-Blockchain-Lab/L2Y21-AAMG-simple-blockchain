@@ -95,6 +95,17 @@ class Blockchain {
     return true;
 
   }
+
+  startMining(miningAddress) {
+
+    setInterval(() => {
+
+      if (this.pendingTransactions.length)
+      this.minePendingTransactions(miningAddress);
+      
+    }, 5 * 1000);
+
+  }
 }
 
 module.exports = Blockchain;
