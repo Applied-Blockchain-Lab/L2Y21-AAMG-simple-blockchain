@@ -3,8 +3,10 @@ const app = express();
 const port = 1312; // temporary hardcoded port
 
 const transactionsRoutes = require('./routes/transactions.js');
+const blocksRoutes = require('./routes/blocks.js');
 
 app.use("/transactions", transactionsRoutes);
+app.use("/blocks", blocksRoutes);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
