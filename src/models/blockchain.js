@@ -14,7 +14,7 @@ class Blockchain {
 
   createGenesisBlock() {
     const genesisDate = '08/09/2021';
-    return new Block([], genesisDate, '0');
+    return new Block({}, genesisDate, '0');
   }
 
   getLastBlock() {
@@ -32,11 +32,15 @@ class Blockchain {
   getTx(txHash) {
 
     this.chain.forEach(block => {
-      block.getTransactions().forEach(tx => {
-        if (tx.hash === txHash) {
-          return tx;
+      let blockTxs = block.getTransactions();
+      
+      for (const key in blockTxs) {
+        if (key === txHash) {
+          console.log('tx found')
+          return txs[key];
         }
-      })
+      }
+
     });
 
   }
@@ -51,25 +55,26 @@ class Blockchain {
 
   minePendingTransactions(miningRewardAddress) {
 
-    const calculatedReward = this.miningReward + sumOfFees(this.pendingTransactions);
+    const calculatedReward = this.miningReward + this.sumOfFees();
 
-    const txReward = new Transaction(null, miningRewardAddress, this.miningReward);
+    const txReward = new Transaction(null, miningRewardAddress, calculatedReward);
     this.pendingTransactions.addTx(txReward);
 
-    let block = new Block(this.pendingTransactions, Date.now(), this.getLastBlock().hash);
+    let block = new Block(this.pendingTransactions.getAllPending(), Date.now(), this.getLastBlock().hash);
     block.mineBlock(this.difficulty);
 
     this.chain.push(block);
-    this.pendingTransactions = [];
+    this.pendingTransactions.draw();
 
   }
 
-  sumOfFees(transactions) {
+  sumOfFees() {
     const txs = this.pendingTransactions.getAllPending();
     let sum = 0;
-    transactions.forEach(tx => {
-      sum += tx.getFee();
-    })
+    for (const key in txs) {
+      sum += +txs[key].getFee();
+    }
+    return sum;
   }
 
   addTransaction(transaction) {
@@ -90,20 +95,23 @@ class Blockchain {
 
     let balance = 0;
 
-    for (const block of this.chain) {
-      for (const tx of block.transactions) {
-        if (tx.fromAddress === address) {
-          balance -= tx.amount;
+    for(let i = 0; i < this.chain.length; i++) {
+      let blockTxs = this.chain[i].transactions;
+      
+      for (const key in blockTxs) {
+
+        if (blockTxs[key].toAddress == address) {
+          balance += blockTxs[key].amount;
         }
 
-        if (tx.toAddress === address) {
-          balance += tx.amount;
+        if (blockTxs[key].fromAddress == address) {
+          balance -= blockTxs[key].amount;
         }
+
       }
+      
     }
-
     return balance;
-
   }
 
   isChainValid(chain) {
