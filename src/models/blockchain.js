@@ -45,6 +45,12 @@ class Blockchain {
 
   }
 
+  getAllTxs() {
+    let transactions = [];
+
+    this.chain.forEach(block => transactions.push(block.getTransactions()));
+  }
+
   getBlock(blockHash) {
     this.chain.forEach(block => {
       if (block.hash === blockHash) {
