@@ -17,7 +17,7 @@ class TransactionsPool {
 
   addTx(tx) {
 
-    if (this.transactions.length >= maxTransactions) {
+    if (this.transactions.length >= this.maxTransactions) {
       console.log('Current block cant handle more transactions');
     } else {
       this.transactions[tx.hash] = tx;
