@@ -8,13 +8,21 @@ class Transaction {
     this.fromAddress = fromAddress;
     this.toAddress = toAddress;
     this.amount = amount;
+    this.fee = this.calculateFee();
     this.hash = this.calculateHash();
-    this.feeInPercent = 3;
+   
 
   }
 
-  getFeePercent() {
-    return this.feeInPercent;
+  calculateFee() {
+    const fee = this.amount * 0.03
+    this.amount -= fee;
+
+    return fee;
+  }
+
+  getFee() {
+    return this.fee;
   }
 
   calculateHash() {
@@ -22,7 +30,8 @@ class Transaction {
     return SHA256(
       this.fromAddress +
       this.toAddress +
-      this.amount
+      this.amount + 
+      this.fee
     ).toString();
 
   }
