@@ -37,7 +37,7 @@ class Blockchain {
       for (const key in blockTxs) {
         if (key === txHash) {
           console.log('tx found')
-          return txs[key];
+          return blockTxs[key];
         }
       }
 
