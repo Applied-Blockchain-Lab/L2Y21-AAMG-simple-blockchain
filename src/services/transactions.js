@@ -1,8 +1,8 @@
 const transactionsPool = require('../models/transactionsPool');
 const blockchain = require('../models/blockchain');
 
-exports.getPendingTransactions = () => {
-    return blockchain.getPendingTransactions();
+exports.getPendingTransactions = (req, res) => {
+    res.json(blockchain.getPendingTransactions());
 };
 
 exports.getLatestTransaction = () => {
@@ -10,12 +10,12 @@ exports.getLatestTransaction = () => {
     const latestTransactions = latestBlock.getTransactions();
 
     if (latestTransactions.length > 0 && latestBlock.hasValidTransactions()) {
-        return latestTransactions[latestTransactions.length - 1];
+        res.json(latestTransactions[latestTransactions.length - 1]);
     }
 };
 
 exports.getTransactionByHash = (hash) => {
-    return blockchain.getTx(hash);
+    res.json(blockchain.getTx(hash));
 };
 
 exports.getTransactionsByAddress = (address) => {
@@ -26,4 +26,6 @@ exports.getTransactionsByAddress = (address) => {
             userTransactions.push(transaction);
         }
     });
+
+    res.json(userTransactions);
 };
