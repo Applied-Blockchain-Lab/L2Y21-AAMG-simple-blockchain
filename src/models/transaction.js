@@ -16,8 +16,8 @@ class Transaction {
 
   calculateFee() {
     const fee = this.amount * 0.03
-    this.amount -= fee;
-
+    if(this.fromAddress !== null)
+      this.amount -= fee;
     return fee;
   }
 
