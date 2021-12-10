@@ -2,12 +2,13 @@ const Block = require('./block');
 const Transaction = require('./transaction');
 
 class Blockchain {
-  constructor() {
+  constructor(pendingTransactions, minerAddress) {
 
     this.chain = [this.createGenesisBlock()];
     this.difficulty = 2;
-    this.pendingTransactions = [];
+    this.pendingTransactions = pendingTransactions;
     this.miningReward = 100;
+    this.minerAddress = minerAddress;
 
   }
 
@@ -50,8 +51,10 @@ class Blockchain {
 
   minePendingTransactions(miningRewardAddress) {
 
+    const calculatedReward = this.miningReward + sumOfFees(this.pendingTransactions);
+
     const txReward = new Transaction(null, miningRewardAddress, this.miningReward);
-    this.pendingTransactions.push(txReward);
+    this.pendingTransactions.addTx(txReward);
 
     let block = new Block(this.pendingTransactions, Date.now(), this.getLastBlock().hash);
     block.mineBlock(this.difficulty);
@@ -59,6 +62,14 @@ class Blockchain {
     this.chain.push(block);
     this.pendingTransactions = [];
 
+  }
+
+  sumOfFees(transactions) {
+    const txs = this.pendingTransactions.getAllPending();
+    let sum = 0;
+    transactions.forEach(tx => {
+      sum += tx.getFee();
+    })
   }
 
   addTransaction(transaction) {
@@ -71,7 +82,7 @@ class Blockchain {
       throw new Error('Cannot add invalid transaction to chain');
     }
 
-    this.pendingTransactions.push(transaction);
+    this.pendingTransactions.addTx(transaction);
 
   }
 
@@ -95,13 +106,13 @@ class Blockchain {
 
   }
 
-  isChainValid() {
+  isChainValid(chain) {
 
-    const chainLength = this.chain.length;
+    const chainLength = chain.length;
 
     for (let i = 0; i < chainLength; i++) {
-      const currentBlock = this.chain[i];
-      const previousBlock = this.chain[i - 1];
+      const currentBlock = chain[i];
+      const previousBlock = chain[i - 1];
 
       if (!currentBlock.hasValidTransactions()) {
         return false;
@@ -122,6 +133,10 @@ class Blockchain {
 
     return true;
 
+  }
+
+  isChainLonger(chain) {
+    return chain.length > this.chain;
   }
 
   startMining(miningAddress) {
