@@ -9,7 +9,12 @@ class Transaction {
     this.toAddress = toAddress;
     this.amount = amount;
     this.hash = this.calculateHash();
+    this.feeInPercent = 3;
 
+  }
+
+  getFeePercent() {
+    return this.feeInPercent;
   }
 
   calculateHash() {
