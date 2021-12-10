@@ -25,7 +25,7 @@ class TransactionsPool {
     
   }
 
-  removeTx() {
+  removeTx(tx) {
     delete this.transactions[tx.hash];
   }
 
