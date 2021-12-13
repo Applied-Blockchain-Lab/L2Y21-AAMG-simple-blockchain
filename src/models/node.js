@@ -37,3 +37,5 @@ class Node extends EventEmitter {
         return this.peers;
     }
 }
+
+module.exports = Node;
