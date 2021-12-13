@@ -6,6 +6,11 @@
   "scripts": {
     "test": "jest --coverage --forceExit --runInBand",
     "start": "nodemon index.js",
+    "node_1": "nodemon --watch dev -e js index.js 3001 http://localhost:3001",
+    "node_2": "nodemon --watch dev -e js index.js 3002 http://localhost:3002",
+    "node_3": "nodemon --watch dev -e js index.js 3003 http://localhost:3003",
+    "node_4": "nodemon --watch dev -e js index.js 3004 http://localhost:3004",
+    "node_5": "nodemon --watch dev -e js index.js 3005 http://localhost:3005",
     "lint": "eslint"
   },
   "repository": {
@@ -25,7 +30,8 @@
     "elliptic": "^6.5.4",
     "express": "^4.17.1",
     "jest": "^27.4.3",
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.15",
+    "request-promise": "^4.2.6"
   },
   "devDependencies": {
     "eslint": "^8.4.1"
