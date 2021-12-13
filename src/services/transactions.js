@@ -7,7 +7,7 @@ exports.getPendingTransactions = (req, res) => {
     res.json(blockchain.getPendingTransactions());
 };
 
-exports.getLatestTransaction = () => {
+exports.getLatestTransaction = (req, res) => {
     const latestBlock = blockchain.getLastBlock();
     const latestTransactions = latestBlock.getTransactions();
 
@@ -16,15 +16,15 @@ exports.getLatestTransaction = () => {
     }
 };
 
-exports.getTransactionByHash = (hash) => {
-    res.json(blockchain.getTx(hash));
+exports.getTransactionByHash = (req, res) => {
+    res.json(blockchain.getTx(req.params.hash));
 };
 
-exports.getTransactionsByAddress = (address) => {
+exports.getTransactionsByAddress = (req, res) => {
     let userTransactions = [];
 
     blockchain.getAllTxs().forEach(transaction => {
-        if (transaction.fromAddress === address || transaction.toAddress === address) {
+        if (transaction.fromAddress === req.params.address || transaction.toAddress === req.params.address) {
             userTransactions.push(transaction);
         }
     });
