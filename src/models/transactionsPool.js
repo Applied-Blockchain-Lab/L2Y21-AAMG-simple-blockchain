@@ -1,8 +1,8 @@
 class TransactionsPool {
 
   constructor() {
-    this.transactions = {}
-    this.maxTransactions = 30;
+    this.transactions = {};
+    this.currentTransactionCount = 0;
   }
 
   getAllPending() {
@@ -12,21 +12,18 @@ class TransactionsPool {
   draw() {
     var tx = this.transactions;
     this.transactions = {};
+    this.currentTransactionCount = 0;
     return tx;
   }
 
   addTx(tx) {
-
-    if (this.transactions.length >= this.maxTransactions) {
-      console.log('Current block cant handle more transactions');
-    } else {
-      this.transactions[tx.hash] = tx;
-    } 
-    
+    this.transactions[tx.hash] = tx;
+    this.currentTransactionCount ++;
   }
 
   removeTx(tx) {
     delete this.transactions[tx.hash];
+    this.currentTransactionCount --
   }
 
   addTxArr(txArr) {
