@@ -1,16 +1,68 @@
 const express = require('express');
 const Transaction = require('./transaction');
+const rp = require('request-promise');
 
 const transactionsRoutes = require('../routes/transactions.js');
 const blocksRoutes = require('../routes/blocks.js');
 const blockchainRoutes = require('../routes/blockchain');
 
-module.exports = ({blockchain, pendingTransactions}) => {
+module.exports = ({port, blockchain, node, pendingTransactions}) => {
     const app = express();
     app.use(express.json());
 
     app.get('/', (req, res) => {
         res.send('Everything is ok')
+    })
+
+    app.post('/blockchain/nodes/registerAndBroadcast', (req, res) => {
+        const newNodeUrl = req.body.newNodeUrl;
+        node.addPeers([newNodeUrl]);
+
+        const regNodesPromises = [];
+
+        node.getPeers().forEach(networkNodeUrl => {
+            
+            const requestOptions = {
+                uri: networkNodeUrl + '/blockchain/nodes/registerNode',
+                method: 'POST',
+                body: { newNodeUrl },
+                json: true
+            }
+
+            regNodesPromises.push(rp(requestOptions));
+        });
+
+        Promise.all(regNodesPromises)
+        .then(data => {
+            const bulkRegisterOptions = {
+                uri: newNodeUrl + '/blockchain/nodes/registerNodesBulk',
+                method: 'POST',
+                body: { allNetworkNodes: [...node.getPeers(), node.getPoolInfo().address ] },
+                json: true
+            };
+
+            return rp(bulkRegisterOptions);
+        })
+        .then(data => {
+            res.json({ note: 'New node registered with network successfully' })
+        });
+
+    })
+
+    app.post('/blockchain/nodes/registerNode', (req, res) => {
+        const newNodeUrl = req.body.newNodeUrl;
+        node.addPeers([newNodeUrl]);
+        res.json({ note: 'New node registered sucessfully'});
+    })
+
+    app.post('/blockchain/nodes/registerNodesBulk', (req, res) => {
+        const allNetworkNodes = req.body.allNetworkNodes;
+        node.addPeers(allNetworkNodes);
+        res.json({note: 'Bulk registration successful.'})
+    })
+
+    app.get('/blockchain/nodes/peers', (req, res) => {
+        res.json(node.getPeers());
     })
 
     app.get('/blockchain/startMining', (req, res) => {
@@ -59,8 +111,8 @@ module.exports = ({blockchain, pendingTransactions}) => {
         res.json(blockchain.getAllBlocks());
     })
 
-    app.listen(8080, () => {
-        console.log(`Example app listening at http://localhost:${8080}`);
+    app.listen(port, () => {
+        console.log(`Example app listening at http://localhost:${port}`);
     });
 
     return {app}
