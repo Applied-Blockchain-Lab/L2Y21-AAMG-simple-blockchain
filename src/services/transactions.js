@@ -1,4 +1,6 @@
-const transactionsPool = require('../models/transactionsPool');
+const EC = require('elliptic').ec;
+const ec = new EC('secp256k1');
+const Transaction = require('../models/transaction');
 const blockchain = require('../models/blockchain');
 
 exports.getPendingTransactions = (req, res) => {
@@ -29,3 +31,17 @@ exports.getTransactionsByAddress = (req, res) => {
 
     res.json(userTransactions);
 };
+
+exports.newTransaction = (req, res) => {
+    const senderPublicKey = process.env.PUBLIC_KEY;
+    const senderPrivateKey = process.env.PRIVATE_KEY;
+    const toAddress = req.body.toAddress;
+    const amount = req.body.amount;
+
+    const key = ec.keyFromPrivate(senderPrivateKey);
+
+    const tx = new Transaction(senderPublicKey, toAddress, amount);
+    tx.signTransaction(key);
+    blockchain.addTransaction(tx);
+    
+}
