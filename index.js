@@ -1,20 +1,15 @@
-const express = require('express');
-const app = express();
-const port = 1312; // temporary hardcoded port
+const HttpServer = require('./src/models/httpServer')
+const Blockchain = require('./src/models/blockchain')
+const TransactionsPool = require('./src/models/transactionsPool')
 require('dotenv').config();
 
-const transactionsRoutes = require('./src/routes/transactions.js');
-const blocksRoutes = require('./src/routes/blocks.js');
-const blockchainRoutes = require('./src/routes/blockchain');
+let minerAddress = process.env.MINER_ADDRESS;
 
-app.use("/transactions", transactionsRoutes);
-app.use("/blocks", blocksRoutes);
-app.use("/blockchain", blockchainRoutes);
+var pendingTransactions = new TransactionsPool();
+var blockchain = new Blockchain(pendingTransactions, minerAddress);
 
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-});
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
-});
+HttpServer({
+	blockchain,
+	pendingTransactions
+})
