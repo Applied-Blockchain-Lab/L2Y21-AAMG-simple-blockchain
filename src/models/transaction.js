@@ -10,8 +10,6 @@ class Transaction {
     this.amount = amount;
     this.fee = this.calculateFee();
     this.hash = this.calculateHash();
-   
-
   }
 
   calculateFee() {
@@ -36,13 +34,14 @@ class Transaction {
 
   }
 
-  signTransaction(signingKey) {
+  signTransaction(signerPrivateKey) {
+    const key = ec.keyFromPrivate(signerPrivateKey);
 
-    if (signingKey.getPublic('hex') !== this.fromAddress) {
+    if (key.getPublic('hex') !== this.fromAddress) {
       throw new Error('You cannot sign transactions for other wallets !');
     }
 
-    const sig = signingKey.sign(this.hash, 'base64');
+    const sig = key.sign(this.hash, 'base64');
     this.signature = sig.toDER('hex');
 
   }
