@@ -1,5 +1,7 @@
 const Block = require('./block');
 const Transaction = require('./transaction');
+const EC = require('elliptic').ec;
+const ec = new EC('secp256k1');
 
 class Blockchain {
   constructor(pendingTransactions, minerAddress) {
@@ -26,7 +28,7 @@ class Blockchain {
   }
 
   getPendingTransactions() {
-    return this.pendingTransactions;
+    return this.pendingTransactions.getAllPending();
   }
 
   getTx(txHash) {
@@ -52,18 +54,20 @@ class Blockchain {
   }
 
   getBlock(blockHash) {
+    let res;
     this.chain.forEach(block => {
       if (block.hash === blockHash) {
-        return block;
+        res = block;
       }
     });
+    return res;
   }
 
-  minePendingTransactions(miningRewardAddress) {
+  minePendingTransactions() {
 
     const calculatedReward = this.miningReward + this.sumOfFees();
 
-    const txReward = new Transaction(null, miningRewardAddress, calculatedReward);
+    const txReward = new Transaction(null, this.minerAddress, calculatedReward);
     this.pendingTransactions.addTx(txReward);
 
     let block = new Block(this.pendingTransactions.getAllPending(), Date.now(), this.getLastBlock().hash);
@@ -84,6 +88,12 @@ class Blockchain {
   }
 
   addTransaction(transaction) {
+
+    const currentBalanceOfSender = this.getBalanceOfAddress(transaction.fromAdrress);
+
+    if (currentBalanceOfSender - transaction.amount < 0) {
+      throw new Error('Insufficient coins');
+    }
 
     if (!transaction.fromAddress || !transaction.toAddress) {
       throw new Error('Transaction must include from and to address');
@@ -153,12 +163,19 @@ class Blockchain {
     return chain.length > this.chain;
   }
 
-  startMining(miningAddress) {
+  generateKeyPair(){
+    const key = ec.genKeyPair();
+    const publicKey = key.getPublic('hex');
+    const privateKey = key.getPrivate('hex');
+    return {publickKey: publicKey, privateKey: privateKey}
+  }
+
+  startMining() {
 
     setInterval(() => {
 
-      if (this.pendingTransactions.length)
-      this.minePendingTransactions(miningAddress);
+      if (this.pendingTransactions.currentTransactionCount > 0)
+      this.minePendingTransactions();
 
     }, 5 * 1000);
 
