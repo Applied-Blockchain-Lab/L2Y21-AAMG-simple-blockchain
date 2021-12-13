@@ -2,8 +2,8 @@ const express = require('express');
 const app = express();
 const port = 1312; // temporary hardcoded port
 
-const transactionsRoutes = require('./routes/transactions.js');
-const blocksRoutes = require('./routes/blocks.js');
+const transactionsRoutes = require('./src/routes/transactions.js');
+const blocksRoutes = require('./src/routes/blocks.js');
 
 app.use("/transactions", transactionsRoutes);
 app.use("/blocks", blocksRoutes);
