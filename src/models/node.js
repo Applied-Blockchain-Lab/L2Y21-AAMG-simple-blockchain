@@ -13,12 +13,11 @@ class Node extends EventEmitter {
 
 
     addPeers(peersToAdd) {
+
         peersToAdd.forEach(peerAddress => {
-            if (this.peers.find(node => node.address === peerAddress)) {
-                this.peers.push({
-                    url: peerAddress,
-                    addedAt: Date.now()
-                });
+            
+            if (!this.peers.find(peer => peer === peerAddress) && peerAddress !== this.address) {
+                this.peers.push(peerAddress);
             }
         });
 
