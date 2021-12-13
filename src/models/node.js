@@ -5,6 +5,7 @@ const EventEmitter = require('events');
 class Node extends EventEmitter {
 
     constructor(address, name) {
+        super();
         this.address = address; // unique identifier
         this.name = name;
         this.peers = [];
