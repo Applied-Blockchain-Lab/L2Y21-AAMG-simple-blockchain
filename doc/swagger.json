@@ -1,0 +1,427 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "L2Y21-AAMG-simple-blockchain",
+        "description": "This documentation describes the API functionalities of this blockchain project. For more information, please refer to: [Official Github repository](https://github.com/Applied-Blockchain-Lab/L2Y21-AAMG-simple-blockchain)",
+        "version": "1.0.2"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:1312/",
+            "description": "Simple blockchain"
+        },
+        {
+            "url": "https://virtserver.swaggerhub.com/Bojidar00/polygon-explorer-api/1.0.0",
+            "description": "SwaggerHub API Auto Mocking"
+        }
+    ],
+    "paths": {
+        "/blocks/hash/{hash}": {
+            "get": {
+                "tags": [
+                    "Blocks"
+                ],
+                "summary": "Get block information by provided hash.",
+                "parameters": [
+                    {
+                        "name": "hash",
+                        "in": "path",
+                        "required": true,
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "oneOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "number"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Block"
+                                }
+                            },
+                            "application/xml": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Block"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/blocks/all": {
+            "get": {
+                "tags": [
+                    "Blocks"
+                ],
+                "summary": "Get all blocks since the creation of the genesis block.",
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Block"
+                                    }
+                                }
+                            },
+                            "application/xml": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Block"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/transactions/pending": {
+            "get": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Get information about pending transactions.",
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/Transaction"
+                                        },
+                                        {
+                                            "type": "array"
+                                        }
+                                    ]
+                                }
+                            },
+                            "application/xml": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/Transaction"
+                                        },
+                                        {
+                                            "type": "array"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/transactions/newTransaction": {
+            "post": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Add a new transaction to the transaction pool.",
+                "parameters": [
+                    {
+                        "name": "fromAddress",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "toAddress",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "amount",
+                        "in": "body",
+                        "schema": {
+                            "type": "number"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "application/xml": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/Transaction"
+                                        },
+                                        {
+                                            "type": "array"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/addresses/{address}": {
+            "get": {
+                "tags": [
+                    "Addresses"
+                ],
+                "summary": "Get account balance.",
+                "parameters": [
+                    {
+                        "name": "address",
+                        "in": "path",
+                        "required": true,
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "number"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/blockchain/generateKeyPair": {
+            "get": {
+                "tags": [
+                    "Blockchain"
+                ],
+                "summary": "Generate a set of a public and private key.",
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "Object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/blockchain/nodes/registerAndBroadcast": {
+            "post": {
+                "tags": [
+                    "Blockchain"
+                ],
+                "summary": "Add a new node and connect with peers.",
+                "parameters": [
+                    {
+                        "name": "newNodeUrl",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/blockchain/nodes/registerNode": {
+            "post": {
+                "tags": [
+                    "Blockchain"
+                ],
+                "summary": "Add new node to existing peers' list of peers.",
+                "parameters": [
+                    {
+                        "name": "newNodeUrl",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/blockchain/nodes/registerNodesBulk": {
+            "post": {
+                "tags": [
+                    "Blockchain"
+                ],
+                "summary": "Assign all existing peers to the newly registered node.",
+                "parameters": [
+                    {
+                        "name": "allNetworkNodes",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/blockchain/nodes/peers": {
+            "get": {
+                "tags": [
+                    "Blockchain"
+                ],
+                "summary": "Get all peers of current node.",
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/blockchain/startMining": {
+            "get": {
+                "tags": [
+                    "Blockchain"
+                ],
+                "summary": "Start the mining process.",
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Block": {
+                "type": "object",
+                "properties": {
+                    "previousHash": {
+                        "type": "string"
+                    },
+                    "hash": {
+                        "type": "string"
+                    },
+                    "timestamp": {
+                        "type": "number",
+                        "format": "date-time"
+                    },
+                    "nonce": {
+                        "type": "number",
+                        "nullable": true
+                    },
+                    "transactions": {
+                        "type": "array",
+                        "items": {
+                            "oneOf": [
+                                {
+                                    "$ref": "#/components/schemas/Transaction"
+                                },
+                                {
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "Transaction": {
+                "type": "object",
+                "properties": {
+                    "hash": {
+                        "type": "string"
+                    },
+                    "blockNumber": {
+                        "type": "number"
+                    },
+                    "fromAddress": {
+                        "type": "string"
+                    },
+                    "toAddress": {
+                        "type": "number"
+                    },
+                    "fee": {
+                        "type": "number"
+                    },
+                    "amount": {
+                        "type": "number"
+                    }
+                }
+            }
+        }
+    }
+}
