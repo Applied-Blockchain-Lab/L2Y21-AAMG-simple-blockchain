@@ -2,10 +2,11 @@ const Block = require('./block');
 const Transaction = require('./transaction');
 const EC = require('elliptic').ec;
 const ec = new EC('secp256k1');
+const EventEmitter = require('events');
 
-class Blockchain {
+class Blockchain extends EventEmitter {
   constructor(pendingTransactions, minerAddress) {
-
+    super();
     this.chain = [this.createGenesisBlock()];
     this.difficulty = 2;
     this.pendingTransactions = pendingTransactions;
@@ -68,7 +69,7 @@ class Blockchain {
     const calculatedReward = this.miningReward + this.sumOfFees();
 
     const txReward = new Transaction(null, this.minerAddress, calculatedReward);
-    this.pendingTransactions.addTx(txReward);
+    // this.pendingTransactions.addTx(txReward);
 
     let block = new Block(this.pendingTransactions.getAllPending(), Date.now(), this.getLastBlock().hash);
     block.mineBlock(this.difficulty);
@@ -76,13 +77,14 @@ class Blockchain {
     this.chain.push(block);
     this.pendingTransactions.draw();
 
+    this.emit('BlockMined', [block, txReward]);
   }
 
   sumOfFees() {
     const txs = this.pendingTransactions.getAllPending();
     let sum = 0;
     for (const key in txs) {
-      sum += +txs[key].getFee();
+      sum += +txs[key].fee;
     }
     return sum;
   }
@@ -99,7 +101,7 @@ class Blockchain {
       throw new Error('Transaction must include from and to address');
     }
 
-    if (!transaction.isValid()) {
+    if (!Transaction.prototype.isValid(transaction)) {
       throw new Error('Cannot add invalid transaction to chain');
     }
 
