@@ -7,11 +7,53 @@ const blocksRoutes = require('../routes/blocks.js');
 const blockchainRoutes = require('../routes/blockchain');
 
 module.exports = ({port, blockchain, node, pendingTransactions}) => {
+
     const app = express();
     app.use(express.json());
 
     app.get('/', (req, res) => {
         res.send('Everything is ok')
+    })
+
+    blockchain.on('BlockMined', ([block, txReward]) => {
+       
+        const requestPromises = [];
+
+        node.getPeers().forEach(nodeUrl => {
+            const requestOptions = {
+                uri: nodeUrl + "/blocks/receiveNewBlock",
+                method: 'POST',
+                body: { newBlock: block },
+                json: true
+            };
+
+            requestPromises.push(rp(requestOptions));
+        })
+
+        Promise.all(requestPromises)
+        .then(data => {
+            const requestOptions = {
+                uri: node.getPoolInfo().address + "/transactions/broadcast",
+                method: 'POST',
+                body: {...txReward, reward: true},
+                json: true
+            };
+
+            return rp(requestOptions);
+        })
+    });
+
+    app.post('/blocks/receiveNewBlock', (req, res) => {
+        const newBlock = req.body.newBlock;
+        const lastBlock = blockchain.getLastBlock();
+        const correctHash = lastBlock.hash === newBlock.previousHash;
+        if (correctHash) {    
+            blockchain.chain.push(newBlock);
+            blockchain.pendingTransactions.draw();
+            res.json({note: "New block received and accepted. "})
+        } else {
+            res.json({note: "New block rejected. "})
+        }
     })
 
     app.post('/blockchain/nodes/registerAndBroadcast', (req, res) => {
@@ -78,15 +120,47 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
 
     app.post('/transactions/newTransaction', (req, res) => {
 
+        const txObj = req.body;
+        Transaction.prototype.isValid(txObj);
+        if (txObj.fromAddress !== null)
+        blockchain.addTransaction(txObj);
+        else 
+        blockchain.pendingTransactions.addTx(txObj);
+        res.send('Transaction successfully added to pool');
+    })
+
+    app.post('/transactions/broadcast', (req, res) => {
+
         const fromAddress = req.body.fromAddress;
         const toAddress = req.body.toAddress;
         const amount = req.body.amount;
         const signerKey = process.env.PRIVATE_KEY;
+        console.log(req.body.reward);
+        const newTransaction = new Transaction(fromAddress, toAddress, amount);
+        if(!req.body.reward) {
+            newTransaction.signTransaction(signerKey);
+            blockchain.addTransaction(newTransaction);
+        } else {
+            blockchain.pendingTransactions.addTx(newTransaction);
+        }
 
-        const txObj = new Transaction(fromAddress, toAddress, amount);
-        txObj.signTransaction(signerKey);
-        blockchain.addTransaction(txObj);
-        res.send('Transaction successfully added to pool');
+        const requestPromises = [];
+        node.getPeers().forEach(nodeUrl => {
+            const requestOptions = {
+                uri: nodeUrl + '/transactions/newTransaction',
+                method: 'POST',
+                body: newTransaction,
+                json: true
+            };
+
+           requestPromises.push(rp(requestOptions));
+
+        });
+        
+        Promise.all(requestPromises)
+        .then(data => {
+            res.json({ note: 'Transaction created and broadcast successfully. '});
+        })
     })
 
     app.get('/transactions/pending', (req, res) => {
@@ -109,6 +183,10 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
 
     app.get('/blocks/all', (req, res) => {
         res.json(blockchain.getAllBlocks());
+    })
+
+    app.get('/blocks/last', (req, res) => {
+        res.json(blockchain.getLastBlock());
     })
 
     app.listen(port, () => {
