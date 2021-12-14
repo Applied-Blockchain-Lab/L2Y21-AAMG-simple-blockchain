@@ -46,18 +46,18 @@ class Transaction {
 
   }
 
-  isValid() {
+  isValid(transactionObj) {
 
-    if (this.fromAddress === null) {
+    if (transactionObj.fromAddress === null) {
       return true;
     }
 
-    if (!this.signature || this.signature.length === 0) {
+    if (!transactionObj.signature || transactionObj.signature.length === 0) {
       throw new Error('No signature in this transaction');
     }
 
-    const publicKey = ec.keyFromPublic(this.fromAddress, 'hex');
-    return publicKey.verify(this.hash, this.signature);
+    const publicKey = ec.keyFromPublic(transactionObj.fromAddress, 'hex');
+    return publicKey.verify(transactionObj.hash, transactionObj.signature);
 
   }
 }
