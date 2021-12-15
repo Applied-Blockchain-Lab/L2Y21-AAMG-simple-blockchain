@@ -46,18 +46,29 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
     app.post('/blocks/receiveNewBlock', (req, res) => {
         const newBlock = req.body.newBlock;
         const lastBlock = blockchain.getLastBlock();
+
+        if (newBlock === undefined){
+            return res.json({note: "New block rejected."})
+        }
+
         const correctHash = lastBlock.hash === newBlock.previousHash;
+
         if (correctHash) {    
             blockchain.chain.push(newBlock);
             blockchain.pendingTransactions.draw();
             res.json({note: "New block received and accepted. "})
         } else {
-            res.json({note: "New block rejected. "})
+            res.json({note: "New block rejected."})
         }
     })
 
     app.post('/blockchain/nodes/registerAndBroadcast', (req, res) => {
         const newNodeUrl = req.body.newNodeUrl;
+
+        if (newNodeUrl === undefined){
+            res.json({ note: 'New node registration failed.' })
+        }
+
         node.addPeers([newNodeUrl]);
 
         const regNodesPromises = [];
@@ -93,12 +104,22 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
 
     app.post('/blockchain/nodes/registerNode', (req, res) => {
         const newNodeUrl = req.body.newNodeUrl;
+
+        if (newNodeUrl === undefined){
+            return res.json({ note: 'New node registration failed.' })
+        }
+
         node.addPeers([newNodeUrl]);
         res.json({ note: 'New node registered sucessfully'});
     })
 
     app.post('/blockchain/nodes/registerNodesBulk', (req, res) => {
         const allNetworkNodes = req.body.allNetworkNodes;
+
+        if (allNetworkNodes === undefined){
+            res.json({ note: 'Bulk registration failed.' })
+        }
+
         node.addPeers(allNetworkNodes);
         res.json({note: 'Bulk registration successful.'})
     })
@@ -111,7 +132,7 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
 
         if (process.env.PUBLIC_KEY && process.env.PRIVATE_KEY && process.env.MINER_ADDRESS) {
             blockchain.startMining();
-            res.send('Miner started !');
+            res.send('Miner started!');
         } else {
             res.send('Please first configure your public, private keys and mining address');
         }
