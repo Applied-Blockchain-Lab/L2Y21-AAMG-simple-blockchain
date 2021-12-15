@@ -43,6 +43,40 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
         })
     });
 
+    blockchain.on('NewNode', () => {
+
+        const initialPeer = process.env.INITIAL_PEER_URL;
+        const newPeer = node.getPoolInfo().address;
+
+        const requestOptions = {
+            uri: initialPeer + '/blockchain/nodes/registerAndBroadcast',
+            method: 'POST',
+            body: {newNodeUrl: newPeer},
+            json: true
+        };
+
+        rp(requestOptions)
+        .then(() => {
+            console.log('Connected to inital peer');
+            blockchain.emit('ConnectedNewNode', newPeer);
+        })
+
+    })
+
+    blockchain.on('ConnectedNewNode', (newPeer) => {
+
+        const requestOptions = {
+            uri: newPeer + '/blockchain/consensus',
+            method: 'GET',
+            json: true
+        };
+
+        rp(requestOptions)
+        .then(() => {
+            console.log('Chain will now synchronise');
+        })
+    })
+
     app.post('/blocks/receiveNewBlock', (req, res) => {
         const newBlock = req.body.newBlock;
         const lastBlock = blockchain.getLastBlock();
@@ -89,6 +123,49 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
             res.json({ note: 'New node registered with network successfully' })
         });
 
+    })
+
+    app.get('/blockchain/consensus', (req, res) => {
+        const requestPromises = [];
+        node.getPeers().forEach(nodeUrl => {
+            const requestOptions = {
+                uri: nodeUrl + '/blockchain',
+                method: 'GET',
+                json: true
+            };
+
+            requestPromises.push(rp(requestOptions))
+        });
+
+        Promise.all(requestPromises)
+        .then(chains => {
+            const currentChainLength = blockchain.chain.length;
+            let maxChainLength = currentChainLength;
+            let newLongestChain = null;
+            let newPendingTransactions = null;
+
+            chains.forEach(otherBlockchain => {
+                
+                if (otherBlockchain.chain.length > maxChainLength) {
+                    maxChainLength = otherBlockchain.chain.length;
+                    newLongestChain = otherBlockchain.chain;
+                    newPendingTransactions = otherBlockchain.pendingTransactions;
+                }
+
+            });
+
+            if (!newLongestChain || (newLongestChain && !blockchain.isChainValid(newLongestChain))) {
+                res.json({ note: 'Current chain has not been replaced '})
+            } else {
+                blockchain.chain = newLongestChain;
+                blockchain.pendingTransactions = newPendingTransactions;
+                res.json({note: 'This chain has been replaced. '})
+            }
+        });
+    });
+
+    app.get('/blockchain', (req, res) => {
+        res.json(blockchain.getBlockchain());
     })
 
     app.post('/blockchain/nodes/registerNode', (req, res) => {
