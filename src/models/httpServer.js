@@ -46,6 +46,7 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
     blockchain.on('NewNode', () => {
 
         const initialPeer = process.env.INITIAL_PEER_URL;
+        
         const newPeer = node.getPoolInfo().address;
 
         const requestOptions = {
@@ -64,7 +65,7 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
     })
 
     blockchain.on('ConnectedNewNode', (newPeer) => {
-
+        
         const requestOptions = {
             uri: newPeer + '/blockchain/consensus',
             method: 'GET',
@@ -145,8 +146,10 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
             let newPendingTransactions = null;
 
             chains.forEach(otherBlockchain => {
+                let otherBlockchainPendingLength = Object.keys(otherBlockchain.pendingTransactions).length;
+                let newPendingTransactionsLength = Object.keys(newPendingTransactions).length;
                 
-                if (otherBlockchain.chain.length > maxChainLength) {
+                if (otherBlockchain.chain.length > maxChainLength || otherBlockchainPendingLength > newPendingTransactionsLength) {
                     maxChainLength = otherBlockchain.chain.length;
                     newLongestChain = otherBlockchain.chain;
                     newPendingTransactions = otherBlockchain.pendingTransactions;
@@ -212,7 +215,6 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
         const toAddress = req.body.toAddress;
         const amount = req.body.amount;
         const signerKey = process.env.PRIVATE_KEY;
-        console.log(req.body.reward);
         const newTransaction = new Transaction(fromAddress, toAddress, amount);
         if(!req.body.reward) {
             newTransaction.signTransaction(signerKey);
@@ -266,8 +268,8 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
         res.json(blockchain.getLastBlock());
     })
 
-    app.listen(port, () => {
-        console.log(`Example app listening at http://localhost:${port}`);
+    app.listen(port, '0.0.0.0', () => {
+        console.log(`Example app listening at ${node.getPoolInfo().address}`);
     });
 
     return {app}
