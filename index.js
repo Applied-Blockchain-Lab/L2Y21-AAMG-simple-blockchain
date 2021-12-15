@@ -4,14 +4,15 @@ const TransactionsPool = require('./src/models/transactionsPool')
 const Node = require('./src/models/node');
 require('dotenv').config();
 
-const currentNodeUrl = process.argv[3];
 
-const httpPort = process.argv[2];
+const currentNodeUrl = process.env.MY_NODE_URL;
+
+const httpPort = process.env.MY_NODE_PORT;
 
 let minerAddress = process.env.MINER_ADDRESS;
 
 var pendingTransactions = new TransactionsPool();
-var node = new Node(currentNodeUrl, "Just node");
+var node = new Node(`http://${currentNodeUrl}:${httpPort}`, "Just node");
 
 var blockchain = new Blockchain(pendingTransactions, minerAddress);
 
