@@ -1,8 +1,8 @@
 class TransactionsPool {
 
-  constructor() {
-    this.transactions = {};
-    this.currentTransactionCount = 0;
+  constructor(transactions) {
+    this.transactions = transactions;
+    this.currentTransactionCount = Object.keys(this.transactions).length;
   }
 
   getAllPending() {
