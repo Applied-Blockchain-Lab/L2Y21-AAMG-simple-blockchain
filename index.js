@@ -11,7 +11,7 @@ const httpPort = process.env.MY_NODE_PORT;
 
 let minerAddress = process.env.MINER_ADDRESS;
 
-var pendingTransactions = new TransactionsPool();
+var pendingTransactions = new TransactionsPool({});
 var node = new Node(`http://${currentNodeUrl}:${httpPort}`, "Just node");
 
 var blockchain = new Blockchain(pendingTransactions, minerAddress);
