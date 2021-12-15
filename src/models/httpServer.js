@@ -1,5 +1,6 @@
 const express = require('express');
 const Transaction = require('./transaction');
+const TransactionsPool = require('./transactionsPool');
 const rp = require('request-promise');
 
 const transactionsRoutes = require('../routes/transactions.js');
@@ -154,7 +155,7 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
             const currentChainLength = blockchain.chain.length;
             let maxChainLength = currentChainLength;
             let newLongestChain = null;
-            let newPendingTransactions = null;
+            let newPendingTransactions = new TransactionsPool({});
 
             chains.forEach(otherBlockchain => {
                 let otherBlockchainPendingLength = Object.keys(otherBlockchain.pendingTransactions).length;
@@ -163,7 +164,7 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
                 if (otherBlockchain.chain.length > maxChainLength || otherBlockchainPendingLength > newPendingTransactionsLength) {
                     maxChainLength = otherBlockchain.chain.length;
                     newLongestChain = otherBlockchain.chain;
-                    newPendingTransactions = otherBlockchain.pendingTransactions;
+                    newPendingTransactions = new TransactionsPool(otherBlockchain.pendingTransactions);
                 }
 
             });
