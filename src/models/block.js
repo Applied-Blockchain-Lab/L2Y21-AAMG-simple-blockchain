@@ -1,4 +1,5 @@
 const { SHA256 } = require('crypto-js');
+const Transaction = require('./transaction');
 
 class Block {
   constructor(transactions, timestamp = String(new Date()), previousHash = '') {
@@ -21,21 +22,31 @@ class Block {
 
   }
 
-  calculateHash() {
+  calculateHash(block) {
+
+    if (!block) {
+      block = this;
+    }    
 
     return SHA256(
-      this.transactions +
-      this.timestamp +
-      this.previousHash + 
-      this.nonce
+      block.transactions +
+      block.timestamp +
+      block.previousHash + 
+      block.nonce
     ).toString();
 
   }
 
-  hasValidTransactions() {
+  hasValidTransactions(block) {
 
-    for (const tx of this.transactions) {
-      if (!tx.isValid()) {
+    if (!block) {
+      block = this;
+    }
+
+    let blockTxs = block.transactions;
+      
+    for (const key in blockTxs) {
+      if(!Transaction.prototype.isValid(blockTxs[key])) {
         return false;
       }
     }

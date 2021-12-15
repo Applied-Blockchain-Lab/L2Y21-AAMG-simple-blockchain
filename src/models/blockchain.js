@@ -12,12 +12,15 @@ class Blockchain extends EventEmitter {
     this.pendingTransactions = pendingTransactions;
     this.miningReward = 100;
     this.minerAddress = minerAddress;
-
   }
 
   createGenesisBlock() {
     const genesisDate = '08/09/2021';
     return new Block({}, genesisDate, '0');
+  }
+
+  getBlockchain() {
+    return this;
   }
 
   getLastBlock() {
@@ -136,15 +139,15 @@ class Blockchain extends EventEmitter {
 
     const chainLength = chain.length;
 
-    for (let i = 0; i < chainLength; i++) {
+    for (let i = 1; i < chainLength; i++) {
       const currentBlock = chain[i];
       const previousBlock = chain[i - 1];
-
-      if (!currentBlock.hasValidTransactions()) {
+      
+      if (!Block.prototype.hasValidTransactions(currentBlock)) {
         return false;
       }
 
-      if (currentBlock.hash !== currentBlock.calculateHash()) {
+      if (currentBlock.hash !== Block.prototype.calculateHash(currentBlock)) {
         console.log(`Block ${i} has been corrupted`);
         return false;
       }
@@ -153,6 +156,18 @@ class Blockchain extends EventEmitter {
         console.log(`Block ${i - 1} has been corrupted`);
         return false;
       }
+    }
+
+    const genesisBlock = chain[0];
+    const isEmptyTransactions = Object.keys(genesisBlock.transactions).length === 0;
+
+    if (genesisBlock.previousHash !== '0' || 
+        genesisBlock.timestamp !== '08/09/2021' || 
+        !isEmptyTransactions ||
+        genesisBlock.nonce !== 0) {
+
+        console.log(`Genesis block is not valid`);
+        return false;
     }
 
     console.log('Chain is valid');
@@ -176,7 +191,7 @@ class Blockchain extends EventEmitter {
 
     setInterval(() => {
 
-      if (this.pendingTransactions.currentTransactionCount > 0)
+      if (this.pendingTransactions.currentTransactionCount > 1)
       this.minePendingTransactions();
 
     }, 5 * 1000);

@@ -22,3 +22,5 @@ HttpServer({
   node,
 	pendingTransactions
 })
+
+blockchain.emit('NewNode');
