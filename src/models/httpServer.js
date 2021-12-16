@@ -146,7 +146,7 @@ module.exports = ({port, blockchain, node}) => {
         });
 
         Promise.all(regNodesPromises)
-        .then(data => {
+        .then(() => {
             const bulkRegisterOptions = {
                 uri: newNodeUrl + '/blockchain/nodes/registerNodesBulk',
                 method: 'POST',
@@ -156,7 +156,7 @@ module.exports = ({port, blockchain, node}) => {
 
             return rp(bulkRegisterOptions);
         })
-        .then(data => {
+        .then(() => {
             res.json({ note: 'New node registered with network successfully' })
         });
 
@@ -289,7 +289,7 @@ module.exports = ({port, blockchain, node}) => {
         });
         
         Promise.all(requestPromises)
-        .then(data => {
+        .then(() => {
             res.json({ note: 'Transaction created and broadcast successfully. '});
         })
     })
