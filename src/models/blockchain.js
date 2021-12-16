@@ -98,11 +98,11 @@ class Blockchain extends EventEmitter {
 
   addTransaction(transaction) {
 
-    // const currentBalanceOfSender = this.getBalanceOfAddress(transaction.fromAdrress);
+    const currentBalanceOfSender = this.getBalanceOfAddress(transaction.fromAdrress);
 
-    // if (currentBalanceOfSender - transaction.amount < 0) {
-    //   throw new Error('Insufficient coins');
-    // }
+    if (currentBalanceOfSender - transaction.amount < 0) {
+      throw new Error('Insufficient coins');
+    }
 
     if (!transaction.fromAddress || !transaction.toAddress) {
       throw new Error('Transaction must include from and to address');
