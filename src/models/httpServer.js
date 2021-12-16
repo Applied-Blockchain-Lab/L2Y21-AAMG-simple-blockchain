@@ -93,7 +93,7 @@ module.exports = ({port, blockchain, node}) => {
         if (correctHash) {    
             blockchain.chain.push(newBlock);
             blockchain.pendingTransactions.draw();
-            res.json({note: "New block received and accepted. "})
+            res.json({note: "New block received and accepted."})
         } else {
             res.json({note: "New block rejected."})
         }
@@ -248,7 +248,7 @@ module.exports = ({port, blockchain, node}) => {
 
     app.post('/transactions/newTransaction', (req, res) => {
 
-        const txObj = req.body;
+        const txObj = req.body.txObj;
         Transaction.prototype.isValid(txObj);
         if (txObj.fromAddress !== null)
         blockchain.addTransaction(txObj);
