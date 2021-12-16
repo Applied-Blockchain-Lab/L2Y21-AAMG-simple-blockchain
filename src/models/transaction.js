@@ -48,6 +48,7 @@ class Transaction {
 
   isValid(transactionObj) {
 
+    // if the transaction is a mining reward then there will be no sender but will be valid
     if (transactionObj.fromAddress === null) {
       return true;
     }

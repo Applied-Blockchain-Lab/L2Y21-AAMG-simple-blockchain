@@ -126,7 +126,7 @@ module.exports = ({port, blockchain, node}) => {
         const newNodeUrl = req.body.newNodeUrl;
 
         if (newNodeUrl === undefined){
-            res.json({ note: 'New node registration failed.' })
+            return res.json({ note: 'New node registration failed.' })
         }
 
         node.addPeers([newNodeUrl]);
@@ -223,7 +223,7 @@ module.exports = ({port, blockchain, node}) => {
         const allNetworkNodes = req.body.allNetworkNodes;
 
         if (allNetworkNodes === undefined){
-            res.json({ note: 'Bulk registration failed.' })
+            return res.json({ note: 'Bulk registration failed.' })
         }
 
         node.addPeers(allNetworkNodes);
@@ -262,6 +262,10 @@ module.exports = ({port, blockchain, node}) => {
         const fromAddress = req.body.fromAddress;
         const toAddress = req.body.toAddress;
         const amount = req.body.amount;
+
+        if (toAddress === undefined || amount === undefined){
+            return res.json({note: "Invalid transaction."});
+        }
         const signerKey = process.env.PRIVATE_KEY;
         const newTransaction = new Transaction(fromAddress, toAddress, amount);
         if(!req.body.reward) {
@@ -302,6 +306,27 @@ module.exports = ({port, blockchain, node}) => {
     })
 
     /* Listen */
+    app.get('/blockchain/generateKeyPair', (req, res) => {
+        res.json(blockchain.generateKeyPair());
+    })
+
+    app.get('/blocks/hash/:blockHash', (req, res) => {
+        const blockHash = req.params.blockHash;
+
+        if (blockHash === null || blockHash.length !== 130){
+            return res.json("Invalid block hash.");
+        }
+
+        res.json(blockchain.getBlock(blockHash));
+    })
+
+    app.get('/blocks/all', (req, res) => {
+        res.json(blockchain.getAllBlocks());
+    })
+
+    app.get('/blocks/last', (req, res) => {
+        res.json(blockchain.getLastBlock());
+    })
 
     app.listen(port, '0.0.0.0', () => {
         console.log(`Example app listening at ${node.getPoolInfo().address}`);
