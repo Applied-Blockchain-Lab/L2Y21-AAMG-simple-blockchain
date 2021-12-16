@@ -38,7 +38,7 @@ class Transaction {
     const key = ec.keyFromPrivate(signerPrivateKey);
 
     if (key.getPublic('hex') !== this.fromAddress) {
-      throw new Error('You cannot sign transactions for other wallets !');
+      throw new Error('You cannot sign transactions for other wallets!');
     }
 
     const sig = key.sign(this.hash, 'base64');
