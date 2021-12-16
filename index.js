@@ -7,7 +7,7 @@ require('dotenv').config();
 
 const currentNodeUrl = process.env.MY_NODE_URL;
 
-const httpPort = process.env.MY_NODE_PORT;
+const httpPort = process.env.MY_NODE_PORT || 3001;
 
 let minerAddress = process.env.MINER_ADDRESS;
 
