@@ -20,8 +20,7 @@ var blockchain = new Blockchain(pendingTransactions, minerAddress);
 HttpServer({
   port: httpPort,
 	blockchain,
-  node,
-	pendingTransactions
+  node
 })
 
 blockchain.emit('NewNode');
