@@ -12,6 +12,7 @@ class Blockchain extends EventEmitter {
     this.pendingTransactions = pendingTransactions;
     this.miningReward = 100;
     this.minerAddress = minerAddress;
+    this.minerStarted = false;
   }
 
   createGenesisBlock() {
@@ -72,15 +73,18 @@ class Blockchain extends EventEmitter {
     const calculatedReward = this.miningReward + this.sumOfFees();
 
     const txReward = new Transaction(null, this.minerAddress, calculatedReward);
-    // this.pendingTransactions.addTx(txReward);
 
     let block = new Block(this.pendingTransactions.getAllPending(), Date.now(), this.getLastBlock().hash);
     block.mineBlock(this.difficulty);
 
-    this.chain.push(block);
-    this.pendingTransactions.draw();
-
-    this.emit('BlockMined', [block, txReward]);
+    if(this.chain[this.chain.length - 1].hash == block.previousHash) {
+      this.chain.push(block);
+      this.pendingTransactions.draw();
+      this.emit('BlockMined', [block, txReward]);
+    } else {
+      console.log('Block rejected')
+    }
+    
   }
 
   sumOfFees() {
@@ -94,11 +98,11 @@ class Blockchain extends EventEmitter {
 
   addTransaction(transaction) {
 
-    const currentBalanceOfSender = this.getBalanceOfAddress(transaction.fromAdrress);
+    // const currentBalanceOfSender = this.getBalanceOfAddress(transaction.fromAdrress);
 
-    if (currentBalanceOfSender - transaction.amount < 0) {
-      throw new Error('Insufficient coins');
-    }
+    // if (currentBalanceOfSender - transaction.amount < 0) {
+    //   throw new Error('Insufficient coins');
+    // }
 
     if (!transaction.fromAddress || !transaction.toAddress) {
       throw new Error('Transaction must include from and to address');
@@ -189,12 +193,23 @@ class Blockchain extends EventEmitter {
 
   startMining() {
 
-    setInterval(() => {
+    if(!this.minerStarted){
+      
+      setInterval(() => {
 
-      if (this.pendingTransactions.currentTransactionCount > 1)
-      this.minePendingTransactions();
+        if (this.pendingTransactions.currentTransactionCount > 1)
+        this.minePendingTransactions();
+  
+      }, 5 * 1000);
+      
+      this.minerStarted = true;
+      return 'Miner started';
+      
+    } else {
+      return 'Miner already started';
+    }
 
-    }, 5 * 1000);
+    
 
   }
 }
