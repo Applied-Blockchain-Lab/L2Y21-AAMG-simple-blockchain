@@ -102,7 +102,7 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
         const newNodeUrl = req.body.newNodeUrl;
 
         if (newNodeUrl === undefined){
-            res.json({ note: 'New node registration failed.' })
+            return res.json({ note: 'New node registration failed.' })
         }
 
         node.addPeers([newNodeUrl]);
@@ -198,7 +198,7 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
         const allNetworkNodes = req.body.allNetworkNodes;
 
         if (allNetworkNodes === undefined){
-            res.json({ note: 'Bulk registration failed.' })
+            return res.json({ note: 'Bulk registration failed.' })
         }
 
         node.addPeers(allNetworkNodes);
@@ -236,6 +236,10 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
         const fromAddress = req.body.fromAddress;
         const toAddress = req.body.toAddress;
         const amount = req.body.amount;
+
+        if (toAddress === undefined || amount === undefined){
+            return res.json({note: "Invalid transaction."});
+        }
         const signerKey = process.env.PRIVATE_KEY;
         const newTransaction = new Transaction(fromAddress, toAddress, amount);
         if(!req.body.reward) {
@@ -279,6 +283,11 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
 
     app.get('/blocks/hash/:blockHash', (req, res) => {
         const blockHash = req.params.blockHash;
+
+        if (blockHash === null || blockHash.length !== 130){
+            return res.json("Invalid block hash.");
+        }
+
         res.json(blockchain.getBlock(blockHash));
     })
 
