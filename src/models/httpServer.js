@@ -3,11 +3,7 @@ const Transaction = require('./transaction');
 const TransactionsPool = require('./transactionsPool');
 const rp = require('request-promise');
 
-const transactionsRoutes = require('../routes/transactions.js');
-const blocksRoutes = require('../routes/blocks.js');
-const blockchainRoutes = require('../routes/blockchain');
-
-module.exports = ({port, blockchain, node, pendingTransactions}) => {
+module.exports = ({port, blockchain, node}) => {
 
     const app = express();
     app.use(express.json());
@@ -15,6 +11,8 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
     app.get('/', (req, res) => {
         res.send('Everything is ok')
     })
+
+    /* Events */
 
     blockchain.on('BlockMined', ([block, txReward]) => {
        
@@ -32,7 +30,7 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
         })
 
         Promise.all(requestPromises)
-        .then(data => {
+        .then(() => {
             const requestOptions = {
                 uri: node.getPoolInfo().address + "/transactions/broadcast",
                 method: 'POST',
@@ -79,11 +77,14 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
         })
     })
 
+    /* Block APIs */
+
     app.post('/blocks/receiveNewBlock', (req, res) => {
         const newBlock = req.body.newBlock;
         const lastBlock = blockchain.getLastBlock();
 
         if (newBlock === undefined){
+            console.log('rejected')
             return res.json({note: "New block rejected."})
         }
 
@@ -96,6 +97,29 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
         } else {
             res.json({note: "New block rejected."})
         }
+    })
+
+    app.get('/blocks/hash/:blockHash', (req, res) => {
+        const blockHash = req.params.blockHash;
+        res.json(blockchain.getBlock(blockHash));
+    })
+
+    app.get('/blocks/all', (req, res) => {
+        res.json(blockchain.getAllBlocks());
+    })
+
+    app.get('/blocks/last', (req, res) => {
+        res.json(blockchain.getLastBlock());
+    })
+
+    /* Blockchain APIs */
+
+    app.get('/blockchain', (req, res) => {
+        res.json(blockchain.getBlockchain());
+    })
+
+    app.get('/blockchain/generateKeyPair', (req, res) => {
+        res.json(blockchain.generateKeyPair());
     })
 
     app.post('/blockchain/nodes/registerAndBroadcast', (req, res) => {
@@ -158,13 +182,18 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
             let newPendingTransactions = new TransactionsPool({});
 
             chains.forEach(otherBlockchain => {
-                let otherBlockchainPendingLength = Object.keys(otherBlockchain.pendingTransactions).length;
-                let newPendingTransactionsLength = Object.keys(newPendingTransactions).length;
+                let otherBlockchainPendingLength = otherBlockchain.pendingTransactions.currentTransactionCount;
+                let newPendingTransactionsLength = newPendingTransactions.currentTransactionCount;
                 
-                if (otherBlockchain.chain.length > maxChainLength || otherBlockchainPendingLength > newPendingTransactionsLength) {
+                if (otherBlockchain.chain.length > maxChainLength && otherBlockchainPendingLength > newPendingTransactionsLength) {
+
                     maxChainLength = otherBlockchain.chain.length;
                     newLongestChain = otherBlockchain.chain;
-                    newPendingTransactions = new TransactionsPool(otherBlockchain.pendingTransactions);
+                    newPendingTransactions.transactions = otherBlockchain.pendingTransactions.transactions;
+
+                } else if (otherBlockchainPendingLength > newPendingTransactionsLength) {
+
+                    newPendingTransactions.transactions = otherBlockchain.pendingTransactions.transactions;
                 }
 
             });
@@ -178,10 +207,6 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
             }
         });
     });
-
-    app.get('/blockchain', (req, res) => {
-        res.json(blockchain.getBlockchain());
-    })
 
     app.post('/blockchain/nodes/registerNode', (req, res) => {
         const newNodeUrl = req.body.newNodeUrl;
@@ -212,13 +237,14 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
     app.get('/blockchain/startMining', (req, res) => {
 
         if (process.env.PUBLIC_KEY && process.env.PRIVATE_KEY && process.env.MINER_ADDRESS) {
-            blockchain.startMining();
-            res.send('Miner started!');
+            res.send(blockchain.startMining());
         } else {
             res.send('Please first configure your public, private keys and mining address');
         }
 
     })
+
+    /* Transaction APIs */
 
     app.post('/transactions/newTransaction', (req, res) => {
 
@@ -268,27 +294,14 @@ module.exports = ({port, blockchain, node, pendingTransactions}) => {
         res.json(blockchain.getPendingTransactions())
     })
 
+    /* Address APIs */
+
     app.get('/balance/:address', (req, res) => {
         const address = req.params.address;
         res.json(blockchain.getBalanceOfAddress(address));
     })
 
-    app.get('/blockchain/generateKeyPair', (req, res) => {
-        res.json(blockchain.generateKeyPair());
-    })
-
-    app.get('/blocks/hash/:blockHash', (req, res) => {
-        const blockHash = req.params.blockHash;
-        res.json(blockchain.getBlock(blockHash));
-    })
-
-    app.get('/blocks/all', (req, res) => {
-        res.json(blockchain.getAllBlocks());
-    })
-
-    app.get('/blocks/last', (req, res) => {
-        res.json(blockchain.getLastBlock());
-    })
+    /* Listen */
 
     app.listen(port, '0.0.0.0', () => {
         console.log(`Example app listening at ${node.getPoolInfo().address}`);
