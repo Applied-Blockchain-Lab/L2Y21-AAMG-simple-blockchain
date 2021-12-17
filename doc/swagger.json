@@ -489,7 +489,6 @@
                             "type": "number"
                         }
                     }
-
                 ],
                 "responses": {
                     "200": {
