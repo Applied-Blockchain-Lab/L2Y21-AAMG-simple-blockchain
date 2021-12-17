@@ -57,7 +57,7 @@ module.exports = ({port, blockchain, node}) => {
 
         rp(requestOptions)
         .then(() => {
-            console.log('Connected to inital peer');
+            console.log('Connected to initial peer');
             blockchain.emit('ConnectedNewNode', newPeer);
         })
 
