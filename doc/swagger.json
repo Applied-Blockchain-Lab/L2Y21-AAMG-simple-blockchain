@@ -16,6 +16,43 @@
         }
     ],
     "paths": {
+        "/blocks/receiveNewBlock": {
+            "post": {
+                "tags": [
+                    "Blocks"
+                ],
+                "summary": "Add a new block to the chain.",
+                "parameters": [
+                    {
+                        "name": "newBlock",
+                        "in": "body",
+                        "required": true,
+                        "style": "form",
+                        "explode": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Block"
+                                }
+                            },
+                            "application/xml": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Block"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/blocks/hash/{hash}": {
             "get": {
                 "tags": [
@@ -84,6 +121,26 @@
                                     "items": {
                                         "$ref": "#/components/schemas/Block"
                                     }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/blocks/last": {
+            "get": {
+                "tags": [
+                    "Blocks"
+                ],
+                "summary": "Get the latest block with its transactions.",
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
                                 }
                             }
                         }
@@ -217,6 +274,26 @@
                 }
             }
         },
+        "/blockchain": {
+            "get": {
+                "tags": [
+                    "Blockchain"
+                ],
+                "summary": "Get the blockchain for the current node with transactions and metadata included.",
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/blockchain/generateKeyPair": {
             "get": {
                 "tags": [
@@ -324,6 +401,26 @@
                 }
             }
         },
+        "/blockchain/consensus": {
+            "get": {
+                "tags": [
+                    "Blockchain"
+                ],
+                "summary": "Reach a consensus and determine the new block which will be added to the chain.",
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/blockchain/nodes/peers": {
             "get": {
                 "tags": [
@@ -350,6 +447,49 @@
                     "Blockchain"
                 ],
                 "summary": "Start the mining process.",
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/transactions/broadcast": {
+            "post": {
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Start the mining process.",
+                "parameters": [
+                    {
+                        "name": "fromAddress",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "toAddress",
+                        "in": "body",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "amount",
+                        "in": "body",
+                        "schema": {
+                            "type": "number"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "ok",
