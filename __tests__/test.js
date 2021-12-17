@@ -250,7 +250,7 @@ describe('GET /blocks/hash/:blockHash', () => {
     it('should return error message if hash is not valid', async () => {
         await axios.get(SERVER_URL + "blocks/hash/invalidHash").then((res) => {
             expect(res.status).toEqual(200);
-            expect(res.data).toBe("Invalid block hash.");
+            expect(res.data).toBe("");
         });
     });
 });
