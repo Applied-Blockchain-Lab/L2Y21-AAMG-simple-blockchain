@@ -194,6 +194,7 @@ module.exports = ({port, blockchain, node}) => {
                 } else if (otherBlockchainPendingLength > newPendingTransactionsLength) {
 
                     newPendingTransactions.transactions = otherBlockchain.pendingTransactions.transactions;
+                    blockchain.pendingTransactions = newPendingTransactions;
                 }
 
             });
