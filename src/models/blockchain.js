@@ -17,7 +17,13 @@ class Blockchain extends EventEmitter {
 
   createGenesisBlock() {
     const genesisDate = '08/09/2021';
-    return new Block({}, genesisDate, '0');
+    return new Block({'0': {
+      
+      fromAddress: "GENESIS",
+      toAddress: "0467672ef21bea1b98528f5262102d9cdb8ebeb04af762145d85868c626c21abe9912fd8e554e6dc742ada69e0f239917a3ab34ef1f752d2ef7a917c7bec029491",
+      amount: 100
+    
+    }}, genesisDate, '0');
   }
 
   getBlockchain() {
@@ -97,9 +103,8 @@ class Blockchain extends EventEmitter {
   }
 
   addTransaction(transaction) {
-
-    const currentBalanceOfSender = this.getBalanceOfAddress(transaction.fromAdrress);
-
+    const sender = transaction.fromAddress;
+    const currentBalanceOfSender = this.getBalanceOfAddress(sender);
     if (currentBalanceOfSender - transaction.amount < 0) {
       throw new Error('Insufficient coins');
     }
